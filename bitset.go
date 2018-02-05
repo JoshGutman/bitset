@@ -1,7 +1,7 @@
 /*
 Package bitset implements bitsets, a mapping
 between non-negative integers and boolean values. It should be more
-efficient than map[uint] bool.
+efficient than map[uint64] bool.
 
 It provides methods for setting, clearing, flipping, and testing
 individual integers.
@@ -50,17 +50,17 @@ import (
 )
 
 // the wordSize of a bit set
-const wordSize = uint(64)
+const wordSize = uint64(64)
 
 // log2WordSize is lg(wordSize)
-const log2WordSize = uint(6)
+const log2WordSize = uint64(6)
 
 // allBits has every bit set
 const allBits uint64 = 0xffffffffffffffff
 
 // A BitSet is a set of bits. The zero value of a BitSet is an empty set of length 0.
 type BitSet struct {
-	length uint
+	length uint64
 	set    []uint64
 }
 
@@ -77,7 +77,7 @@ func (b *BitSet) safeSet() []uint64 {
 
 // From is a constructor used to create a BitSet from an array of integers
 func From(buf []uint64) *BitSet {
-	return &BitSet{uint(len(buf)) * 64, buf}
+	return &BitSet{uint64(len(buf)) * 64, buf}
 }
 
 // Bytes returns the bitset as array of integers
@@ -86,7 +86,7 @@ func (b *BitSet) Bytes() []uint64 {
 }
 
 // wordsNeeded calculates the number of words needed for i bits
-func wordsNeeded(i uint) int {
+func wordsNeeded(i uint64) int {
 	if i > (Cap() - wordSize + 1) {
 		return int(Cap() >> log2WordSize)
 	}
@@ -94,7 +94,7 @@ func wordsNeeded(i uint) int {
 }
 
 // New creates a new BitSet with a hint that length bits will be required
-func New(length uint) (bset *BitSet) {
+func New(length uint64) (bset *BitSet) {
 	defer func() {
 		if r := recover(); r != nil {
 			bset = &BitSet{
@@ -113,17 +113,17 @@ func New(length uint) (bset *BitSet) {
 }
 
 // Cap returns the total possible capacity, or number of bits
-func Cap() uint {
-	return ^uint(0)
+func Cap() uint64 {
+	return ^uint64(0)
 }
 
 // Len returns the length of the BitSet in words
-func (b *BitSet) Len() uint {
+func (b *BitSet) Len() uint64 {
 	return b.length
 }
 
 // extendSetMaybe adds additional words to incorporate new bits if needed
-func (b *BitSet) extendSetMaybe(i uint) {
+func (b *BitSet) extendSetMaybe(i uint64) {
 	if i >= b.length { // if we need more bits, make 'em
 		nsize := wordsNeeded(i + 1)
 		if b.set == nil {
@@ -140,7 +140,7 @@ func (b *BitSet) extendSetMaybe(i uint) {
 }
 
 // Test whether bit i is set.
-func (b *BitSet) Test(i uint) bool {
+func (b *BitSet) Test(i uint64) bool {
 	if i >= b.length {
 		return false
 	}
@@ -148,14 +148,14 @@ func (b *BitSet) Test(i uint) bool {
 }
 
 // Set bit i to 1
-func (b *BitSet) Set(i uint) *BitSet {
-	b.extendSetMaybe(i)
+func (b *BitSet) Set(i uint64) *BitSet {
+	//b.extendSetMaybe(i)
 	b.set[i>>log2WordSize] |= 1 << (i & (wordSize - 1))
 	return b
 }
 
 // Clear bit i to 0
-func (b *BitSet) Clear(i uint) *BitSet {
+func (b *BitSet) Clear(i uint64) *BitSet {
 	if i >= b.length {
 		return b
 	}
@@ -164,7 +164,7 @@ func (b *BitSet) Clear(i uint) *BitSet {
 }
 
 // SetTo sets bit i to value
-func (b *BitSet) SetTo(i uint, value bool) *BitSet {
+func (b *BitSet) SetTo(i uint64, value bool) *BitSet {
 	if value {
 		return b.Set(i)
 	}
@@ -172,7 +172,7 @@ func (b *BitSet) SetTo(i uint, value bool) *BitSet {
 }
 
 // Flip bit at i
-func (b *BitSet) Flip(i uint) *BitSet {
+func (b *BitSet) Flip(i uint64) *BitSet {
 	if i >= b.length {
 		return b.Set(i)
 	}
@@ -209,7 +209,7 @@ func (b *BitSet) String() string {
 // including possibly the current index
 // along with an error code (true = valid, false = no set bit found)
 // for i,e := v.NextSet(0); e; i,e = v.NextSet(i + 1) {...}
-func (b *BitSet) NextSet(i uint) (uint, bool) {
+func (b *BitSet) NextSet(i uint64) (uint64, bool) {
 	x := int(i >> log2WordSize)
 	if x >= len(b.set) {
 		return 0, false
@@ -222,7 +222,7 @@ func (b *BitSet) NextSet(i uint) (uint, bool) {
 	x = x + 1
 	for x < len(b.set) {
 		if b.set[x] != 0 {
-			return uint(x)*wordSize + trailingZeroes64(b.set[x]), true
+			return uint64(x)*wordSize + trailingZeroes64(b.set[x]), true
 		}
 		x = x + 1
 
@@ -233,7 +233,7 @@ func (b *BitSet) NextSet(i uint) (uint, bool) {
 // NextClear returns the next clear bit from the specified index,
 // including possibly the current index
 // along with an error code (true = valid, false = no bit found i.e. all bits are set)
-func (b *BitSet) NextClear(i uint) (uint, bool) {
+func (b *BitSet) NextClear(i uint64) (uint64, bool) {
 	x := int(i >> log2WordSize)
 	if x >= len(b.set) {
 		return 0, false
@@ -247,7 +247,7 @@ func (b *BitSet) NextClear(i uint) (uint, bool) {
 	}
 	x++
 	for x < len(b.set) {
-		index = uint(x)*wordSize + trailingZeroes64(^b.set[x])
+		index = uint64(x)*wordSize + trailingZeroes64(^b.set[x])
 		if b.set[x] != allBits && index < b.length {
 			return index, true
 		}
@@ -283,7 +283,7 @@ func (b *BitSet) Clone() *BitSet {
 // Copy into a destination BitSet
 // Returning the size of the destination BitSet
 // like array copy
-func (b *BitSet) Copy(c *BitSet) (count uint) {
+func (b *BitSet) Copy(c *BitSet) (count uint64) {
 	if c == nil {
 		return
 	}
@@ -298,9 +298,9 @@ func (b *BitSet) Copy(c *BitSet) (count uint) {
 }
 
 // Count (number of set bits)
-func (b *BitSet) Count() uint {
+func (b *BitSet) Count() uint64 {
 	if b != nil && b.set != nil {
-		return uint(popcntSlice(b.set))
+		return uint64(popcntSlice(b.set))
 	}
 	return 0
 }
@@ -351,7 +351,7 @@ func (b *BitSet) Difference(compare *BitSet) (result *BitSet) {
 }
 
 // DifferenceCardinality computes the cardinality of the differnce
-func (b *BitSet) DifferenceCardinality(compare *BitSet) uint {
+func (b *BitSet) DifferenceCardinality(compare *BitSet) uint64 {
 	panicIfNull(b)
 	panicIfNull(compare)
 	l := int(compare.wordCount())
@@ -361,7 +361,7 @@ func (b *BitSet) DifferenceCardinality(compare *BitSet) uint {
 	cnt := uint64(0)
 	cnt += popcntMaskSlice(b.set[:l], compare.set[:l])
 	cnt += popcntSlice(b.set[l:])
-	return uint(cnt)
+	return uint64(cnt)
 }
 
 // InPlaceDifference computes the difference of base set and other set
@@ -403,12 +403,12 @@ func (b *BitSet) Intersection(compare *BitSet) (result *BitSet) {
 }
 
 // IntersectionCardinality computes the cardinality of the union
-func (b *BitSet) IntersectionCardinality(compare *BitSet) uint {
+func (b *BitSet) IntersectionCardinality(compare *BitSet) uint64 {
 	panicIfNull(b)
 	panicIfNull(compare)
 	b, compare = sortByLength(b, compare)
 	cnt := popcntAndSlice(b.set, compare.set)
-	return uint(cnt)
+	return uint64(cnt)
 }
 
 // InPlaceIntersection destructively computes the intersection of
@@ -447,7 +447,7 @@ func (b *BitSet) Union(compare *BitSet) (result *BitSet) {
 
 // UnionCardinality computes the cardinality of the uniton of the base set
 // and the compare set.
-func (b *BitSet) UnionCardinality(compare *BitSet) uint {
+func (b *BitSet) UnionCardinality(compare *BitSet) uint64 {
 	panicIfNull(b)
 	panicIfNull(compare)
 	b, compare = sortByLength(b, compare)
@@ -455,7 +455,7 @@ func (b *BitSet) UnionCardinality(compare *BitSet) uint {
 	if len(compare.set) > len(b.set) {
 		cnt += popcntSlice(compare.set[len(b.set):])
 	}
-	return uint(cnt)
+	return uint64(cnt)
 }
 
 // InPlaceUnion creates the destructive union of base set and compare set.
@@ -495,7 +495,7 @@ func (b *BitSet) SymmetricDifference(compare *BitSet) (result *BitSet) {
 }
 
 // SymmetricDifferenceCardinality computes the cardinality of the symmetric difference
-func (b *BitSet) SymmetricDifferenceCardinality(compare *BitSet) uint {
+func (b *BitSet) SymmetricDifferenceCardinality(compare *BitSet) uint64 {
 	panicIfNull(b)
 	panicIfNull(compare)
 	b, compare = sortByLength(b, compare)
@@ -503,7 +503,7 @@ func (b *BitSet) SymmetricDifferenceCardinality(compare *BitSet) uint {
 	if len(compare.set) > len(b.set) {
 		cnt += popcntSlice(compare.set[len(b.set):])
 	}
-	return uint(cnt)
+	return uint64(cnt)
 }
 
 // InPlaceSymmetricDifference creates the destructive SymmetricDifference of base set and other set
@@ -636,7 +636,7 @@ func (b *BitSet) ReadFrom(stream io.Reader) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	newset := New(uint(length))
+	newset := New(uint64(length))
 
 	if uint64(newset.length) != length {
 		return 0, errors.New("Unmarshalling error: type mismatch")
