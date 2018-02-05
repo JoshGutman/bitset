@@ -16,7 +16,7 @@ import (
 
 func TestStringer(t *testing.T) {
 	v := New(0)
-	for i := uint(0); i < 10; i++ {
+	for i := uint64(0); i < 10; i++ {
 		v.Set(i)
 	}
 	if v.String() != "{0,1,2,3,4,5,6,7,8,9}" {
@@ -27,7 +27,7 @@ func TestStringer(t *testing.T) {
 
 func TestStringLong(t *testing.T) {
 	v := New(0)
-	for i := uint(0); i < 262145; i++ {
+	for i := uint64(0); i < 262145; i++ {
 		v.Set(i)
 	}
 	str := v.String()
@@ -68,7 +68,7 @@ func TestBitSetNew(t *testing.T) {
 }
 
 func TestBitSetHuge(t *testing.T) {
-	v := New(uint(math.MaxUint32))
+	v := New(uint64(math.MaxUint32))
 	if v.Test(0) {
 		t.Errorf("Unable to make a huge bit set and read its 0th value.")
 	}
@@ -83,7 +83,7 @@ func TestLen(t *testing.T) {
 
 func TestBitSetIsClear(t *testing.T) {
 	v := New(1000)
-	for i := uint(0); i < 1000; i++ {
+	for i := uint64(0); i < 1000; i++ {
 		if v.Test(i) {
 			t.Errorf("Bit %d is set, and it shouldn't be.", i)
 		}
@@ -107,7 +107,7 @@ func TestExpand(t *testing.T) {
 			t.Error("Expansion should not have caused a panic")
 		}
 	}()
-	for i := uint(0); i < 1000; i++ {
+	for i := uint64(0); i < 1000; i++ {
 		v.Set(i)
 	}
 }
@@ -129,7 +129,7 @@ func TestNextClear(t *testing.T) {
 	}
 
 	v = New(1000)
-	for i := uint(0); i < 66; i++ {
+	for i := uint64(0); i < 66; i++ {
 		v.Set(i)
 	}
 	next, found = v.NextClear(0)
@@ -138,7 +138,7 @@ func TestNextClear(t *testing.T) {
 	}
 
 	v = New(1000)
-	for i := uint(0); i < 64; i++ {
+	for i := uint64(0); i < 64; i++ {
 		v.Set(i)
 	}
 	v.Clear(45)
@@ -149,7 +149,7 @@ func TestNextClear(t *testing.T) {
 	}
 
 	v = New(1000)
-	for i := uint(0); i < 128; i++ {
+	for i := uint64(0); i < 128; i++ {
 		v.Set(i)
 	}
 	v.Clear(73)
@@ -178,7 +178,7 @@ func TestNextClear(t *testing.T) {
 		t.Errorf("Found next clear bit as %d, it should have been 0", next)
 	}
 
-	for i := uint(0); i < 128; i++ {
+	for i := uint64(0); i < 128; i++ {
 		v.Set(i)
 	}
 	_, found = v.NextClear(0)
@@ -194,7 +194,7 @@ func TestNextClear(t *testing.T) {
 	}
 
 	v = New(100)
-	for i := uint(0); i != 100; i++ {
+	for i := uint64(0); i != 100; i++ {
 		v.Set(i)
 	}
 	next, found = v.NextClear(0)
@@ -209,7 +209,7 @@ func TestIterate(t *testing.T) {
 	v.Set(0)
 	v.Set(1)
 	v.Set(2)
-	data := make([]uint, 3)
+	data := make([]uint64, 3)
 	c := 0
 	for i, e := v.NextSet(0); e; i, e = v.NextSet(i + 1) {
 		data[c] = i
@@ -226,7 +226,7 @@ func TestIterate(t *testing.T) {
 	}
 	v.Set(10)
 	v.Set(2000)
-	data = make([]uint, 5)
+	data = make([]uint64, 5)
 	c = 0
 	for i, e := v.NextSet(0); e; i, e = v.NextSet(i + 1) {
 		data[c] = i
@@ -289,11 +289,11 @@ func TestOutOfBoundsClose(t *testing.T) {
 }
 
 func TestCount(t *testing.T) {
-	tot := uint(64*4 + 11) // just some multi unit64 number
+	tot := uint64(64*4 + 11) // just some multi unit64 number
 	v := New(tot)
 	checkLast := true
-	for i := uint(0); i < tot; i++ {
-		sz := uint(v.Count())
+	for i := uint64(0); i < tot; i++ {
+		sz := uint64(v.Count())
 		if sz != i {
 			t.Errorf("Count reported as %d, but it should be %d", sz, i)
 			checkLast = false
@@ -302,7 +302,7 @@ func TestCount(t *testing.T) {
 		v.Set(i)
 	}
 	if checkLast {
-		sz := uint(v.Count())
+		sz := uint64(v.Count())
 		if sz != tot {
 			t.Errorf("After all bits set, size reported as %d, but it should be %d", sz, tot)
 		}
@@ -311,10 +311,10 @@ func TestCount(t *testing.T) {
 
 // test setting every 3rd bit, just in case something odd is happening
 func TestCount2(t *testing.T) {
-	tot := uint(64*4 + 11) // just some multi unit64 number
+	tot := uint64(64*4 + 11) // just some multi unit64 number
 	v := New(tot)
-	for i := uint(0); i < tot; i += 3 {
-		sz := uint(v.Count())
+	for i := uint64(0); i < tot; i += 3 {
+		sz := uint64(v.Count())
 		if sz != i/3 {
 			t.Errorf("Count reported as %d, but it should be %d", sz, i)
 			break
@@ -576,11 +576,11 @@ func TestEqual(t *testing.T) {
 func TestUnion(t *testing.T) {
 	a := New(100)
 	b := New(200)
-	for i := uint(1); i < 100; i += 2 {
+	for i := uint64(1); i < 100; i += 2 {
 		a.Set(i)
 		b.Set(i - 1)
 	}
-	for i := uint(100); i < 200; i++ {
+	for i := uint64(100); i < 200; i++ {
 		b.Set(i)
 	}
 	if a.UnionCardinality(b) != 200 {
@@ -603,11 +603,11 @@ func TestUnion(t *testing.T) {
 func TestInPlaceUnion(t *testing.T) {
 	a := New(100)
 	b := New(200)
-	for i := uint(1); i < 100; i += 2 {
+	for i := uint64(1); i < 100; i += 2 {
 		a.Set(i)
 		b.Set(i - 1)
 	}
-	for i := uint(100); i < 200; i++ {
+	for i := uint64(100); i < 200; i++ {
 		b.Set(i)
 	}
 	c := a.Clone()
@@ -628,11 +628,11 @@ func TestInPlaceUnion(t *testing.T) {
 func TestIntersection(t *testing.T) {
 	a := New(100)
 	b := New(200)
-	for i := uint(1); i < 100; i += 2 {
+	for i := uint64(1); i < 100; i += 2 {
 		a.Set(i)
 		b.Set(i - 1).Set(i)
 	}
-	for i := uint(100); i < 200; i++ {
+	for i := uint64(100); i < 200; i++ {
 		b.Set(i)
 	}
 	if a.IntersectionCardinality(b) != 50 {
@@ -654,11 +654,11 @@ func TestIntersection(t *testing.T) {
 func TestInplaceIntersection(t *testing.T) {
 	a := New(100)
 	b := New(200)
-	for i := uint(1); i < 100; i += 2 {
+	for i := uint64(1); i < 100; i += 2 {
 		a.Set(i)
 		b.Set(i - 1).Set(i)
 	}
-	for i := uint(100); i < 200; i++ {
+	for i := uint64(100); i < 200; i++ {
 		b.Set(i)
 	}
 	c := a.Clone()
@@ -679,11 +679,11 @@ func TestInplaceIntersection(t *testing.T) {
 func TestDifference(t *testing.T) {
 	a := New(100)
 	b := New(200)
-	for i := uint(1); i < 100; i += 2 {
+	for i := uint64(1); i < 100; i += 2 {
 		a.Set(i)
 		b.Set(i - 1)
 	}
-	for i := uint(100); i < 200; i++ {
+	for i := uint64(100); i < 200; i++ {
 		b.Set(i)
 	}
 	if a.DifferenceCardinality(b) != 50 {
@@ -709,11 +709,11 @@ func TestDifference(t *testing.T) {
 func TestInPlaceDifference(t *testing.T) {
 	a := New(100)
 	b := New(200)
-	for i := uint(1); i < 100; i += 2 {
+	for i := uint64(1); i < 100; i += 2 {
 		a.Set(i)
 		b.Set(i - 1)
 	}
-	for i := uint(100); i < 200; i++ {
+	for i := uint64(100); i < 200; i++ {
 		b.Set(i)
 	}
 	c := a.Clone()
@@ -734,11 +734,11 @@ func TestInPlaceDifference(t *testing.T) {
 func TestSymmetricDifference(t *testing.T) {
 	a := New(100)
 	b := New(200)
-	for i := uint(1); i < 100; i += 2 {
+	for i := uint64(1); i < 100; i += 2 {
 		a.Set(i)            // 01010101010 ... 0000000
 		b.Set(i - 1).Set(i) // 11111111111111111000000
 	}
-	for i := uint(100); i < 200; i++ {
+	for i := uint64(100); i < 200; i++ {
 		b.Set(i)
 	}
 	if a.SymmetricDifferenceCardinality(b) != 150 {
@@ -764,11 +764,11 @@ func TestSymmetricDifference(t *testing.T) {
 func TestInPlaceSymmetricDifference(t *testing.T) {
 	a := New(100)
 	b := New(200)
-	for i := uint(1); i < 100; i += 2 {
+	for i := uint64(1); i < 100; i += 2 {
 		a.Set(i)            // 01010101010 ... 0000000
 		b.Set(i - 1).Set(i) // 11111111111111111000000
 	}
-	for i := uint(100); i < 200; i++ {
+	for i := uint64(100); i < 200; i++ {
 		b.Set(i)
 	}
 	c := a.Clone()
@@ -808,13 +808,13 @@ func TestIsSuperSet(t *testing.T) {
 	// Setup bitsets
 	// a and b overlap
 	// only c is (strict) super set
-	for i := uint(0); i < 100; i++ {
+	for i := uint64(0); i < 100; i++ {
 		a.Set(i)
 	}
-	for i := uint(50); i < 150; i++ {
+	for i := uint64(50); i < 150; i++ {
 		b.Set(i)
 	}
-	for i := uint(0); i < 200; i++ {
+	for i := uint64(0); i < 200; i++ {
 		c.Set(i)
 	}
 
@@ -963,7 +963,7 @@ func TestBytes(t *testing.T) {
 func TestCap(t *testing.T) {
 	c := Cap()
 	if c <= 0 {
-		t.Error("The uint capacity should be >= 0")
+		t.Error("The uint64 capacity should be >= 0")
 		return
 	}
 }

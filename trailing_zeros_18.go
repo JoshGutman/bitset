@@ -9,6 +9,6 @@ var deBruijn = [...]byte{
 	54, 26, 40, 15, 34, 20, 31, 10, 25, 14, 19, 9, 13, 8, 7, 6,
 }
 
-func trailingZeroes64(v uint64) uint {
-	return uint(deBruijn[((v&-v)*0x03f79d71b4ca8b09)>>58])
+func trailingZeroes64(v uint64) uint64 {
+	return uint64(deBruijn[((v&-v)*0x03f79d71b4ca8b09)>>58])
 }
